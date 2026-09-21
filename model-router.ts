@@ -1,4 +1,4 @@
-import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 
 const TYPESAFE_URL = "https://api.typesafe.ai/v1/systemone";
 const JEV_MODEL = "jev-1.13.0";
@@ -19,12 +19,76 @@ const MODELS = {
 
 type ModelId = keyof typeof MODELS;
 
+type RoutingState = {
+  current_request: string;
+  conversation_context?: string;
+  current_task?: string;
+  recent_result?: string;
+};
+
+const MAX_CONTEXT_CHARS = 1_800;
+const MAX_ITEM_CHARS = 600;
+
+function clip(value: string, limit = MAX_ITEM_CHARS): string {
+  const compact = value.replace(/\s+/g, " ").trim();
+  return compact.length > limit ? `${compact.slice(0, limit - 1)}…` : compact;
+}
+
+function messageText(message: unknown): string {
+  if (!message || typeof message !== "object") return "";
+  const content = (message as { content?: unknown }).content;
+  if (typeof content === "string") return content;
+  if (!Array.isArray(content)) return "";
+  return content
+    .filter((part): part is { text: string } =>
+      !!part && typeof part === "object" && typeof (part as { text?: unknown }).text === "string",
+    )
+    .map((part) => part.text)
+    .join(" ");
+}
+
+function buildRoutingState(ctx: ExtensionContext, request: string): RoutingState {
+  const entries = ctx.sessionManager.buildContextEntries() as Array<{
+    type?: string;
+    message?: { role?: string; content?: unknown; isError?: boolean; toolName?: string };
+    summary?: string;
+  }>;
+  const messages = entries
+    .map((entry) => {
+      if (entry.type === "compaction" || entry.type === "branch_summary") {
+        return entry.summary ? { role: "summary", text: entry.summary } : undefined;
+      }
+      if (entry.type !== "message" || !entry.message) return undefined;
+      const text = messageText(entry.message);
+      return text ? { role: entry.message.role ?? "message", text, message: entry.message } : undefined;
+    })
+    .filter((item): item is { role: string; text: string; message?: { isError?: boolean; toolName?: string } } => !!item);
+
+  const userMessages = messages.filter((item) => item.role === "user");
+  // Short follow-ups such as “implement that” inherit the last substantive task.
+  const substantiveTask = [...userMessages].reverse().find((item) => item.text.trim().length >= 24);
+  const currentTask = substantiveTask?.text ?? userMessages.at(-1)?.text;
+  const recent = messages.slice(-6).map((item) => `${item.role}: ${clip(item.text)}`);
+  const lastUserIndex = messages.map((item) => item.role).lastIndexOf("user");
+  const latestTool = [...messages.slice(lastUserIndex + 1)].reverse().find((item) => item.role === "toolResult");
+  // Keep a result only from the immediately preceding work; old tool output is noise.
+  const recentResult = latestTool && (latestTool.message?.isError || latestTool.text.length <= MAX_ITEM_CHARS)
+    ? `${latestTool.message?.toolName ?? "tool"}: ${clip(latestTool.text)}`
+    : undefined;
+
+  const state: RoutingState = { current_request: request };
+  if (recent.length) state.conversation_context = clip(recent.join("\n"), MAX_CONTEXT_CHARS);
+  if (currentTask) state.current_task = clip(currentTask);
+  if (recentResult) state.recent_result = recentResult;
+  return state;
+}
+
 function isModelId(value: unknown): value is ModelId {
   return typeof value === "string" && Object.hasOwn(MODELS, value);
 }
 
 async function chooseModel(
-  request: string,
+  state: RoutingState,
   signal?: AbortSignal,
 ): Promise<{ modelId: ModelId; confident: boolean }> {
   const apiKey = process.env.TYPESAFE_API_KEY?.trim();
@@ -39,7 +103,7 @@ async function chooseModel(
     },
     body: JSON.stringify({
       model: JEV_MODEL,
-      state: { current_request: request },
+      state,
       questions: {
         model: {
           type: "choice",
@@ -95,7 +159,10 @@ export default function (pi: ExtensionAPI) {
 
     routing = true;
     try {
-      const { modelId: suggestedModelId, confident } = await chooseModel(event.text, ctx.signal);
+      const { modelId: suggestedModelId, confident } = await chooseModel(
+        buildRoutingState(ctx, event.text),
+        ctx.signal,
+      );
       const currentModelId =
         ctx.model?.provider === MODEL_PROVIDER && isModelId(ctx.model.id) ? ctx.model.id : undefined;
       let modelId = suggestedModelId;
