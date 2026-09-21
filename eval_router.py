@@ -4,6 +4,7 @@
 import argparse
 import concurrent.futures
 import json
+import math
 import os
 from pathlib import Path
 import sys
@@ -70,7 +71,7 @@ def load_cases(path: Path) -> list[dict[str, str]]:
     return cases
 
 
-def route(prompt: str, api_key: str, timeout: float) -> str:
+def route(prompt: str, api_key: str, timeout: float) -> dict[str, str | float]:
     payload = {
         "model": JEV_MODEL,
         "state": {"current_request": prompt},
@@ -90,24 +91,30 @@ def route(prompt: str, api_key: str, timeout: float) -> str:
     )
     with urllib.request.urlopen(request, timeout=timeout) as response:
         body = json.load(response)
-    choice = body.get("answers", {}).get("model", {}).get("choice")
+    answer = body.get("answers", {}).get("model", {})
+    choice = answer.get("choice")
     if choice not in MODELS:
         raise ValueError(f"invalid model choice: {choice!r}")
-    return choice
+    confidence = answer.get("confidence")
+    if not isinstance(confidence, (int, float)) or isinstance(confidence, bool) or not math.isfinite(confidence):
+        raise ValueError(f"invalid confidence: {confidence!r}")
+    return {"model": choice, "confidence": confidence}
 
 
-def evaluate(case: dict[str, str], api_key: str, timeout: float) -> dict[str, str]:
+def evaluate(case: dict[str, str], api_key: str, timeout: float) -> dict[str, str | float]:
     try:
-        return {**case, "prediction": route(case["prompt"], api_key, timeout)}
+        decision = route(case["prompt"], api_key, timeout)
+        return {**case, "prediction": decision["model"], "confidence": decision["confidence"]}
     except (OSError, ValueError, urllib.error.HTTPError) as error:
         return {**case, "error": str(error)}
 
 
-def print_report(results: list[dict[str, str]]) -> None:
+def print_report(results: list[dict[str, str | float]]) -> None:
     completed = [result for result in results if "prediction" in result]
     exact = sum(result["prediction"] == result["label"] for result in completed)
-    under = sum(TIERS.index(result["prediction"]) < TIERS.index(result["label"]) for result in completed)
-    over = sum(TIERS.index(result["prediction"]) > TIERS.index(result["label"]) for result in completed)
+    routed = [result for result in completed if result["prediction"] in MODELS]
+    under = sum(TIERS.index(result["prediction"]) < TIERS.index(result["label"]) for result in routed)
+    over = sum(TIERS.index(result["prediction"]) > TIERS.index(result["label"]) for result in routed)
     print(f"cases: {len(results)}  completed: {len(completed)}  errors: {len(results) - len(completed)}")
     if completed:
         print(f"exact: {exact}/{len(completed)} ({exact / len(completed):.1%})  under: {under}  over: {over}")

@@ -4,6 +4,7 @@ const TYPESAFE_URL = "https://api.typesafe.ai/v1/systemone";
 const JEV_MODEL = "jev-1.13.0";
 const MODEL_PROVIDER = "openai-codex";
 const TIMEOUT_MS = 5_000;
+const MIN_CONFIDENCE = 0.65;
 
 const MODELS = {
   "gpt-5.6-luna":
@@ -22,7 +23,10 @@ function isModelId(value: unknown): value is ModelId {
   return typeof value === "string" && Object.hasOwn(MODELS, value);
 }
 
-async function chooseModel(request: string, signal?: AbortSignal): Promise<ModelId> {
+async function chooseModel(
+  request: string,
+  signal?: AbortSignal,
+): Promise<{ modelId: ModelId; confident: boolean }> {
   const apiKey = process.env.TYPESAFE_API_KEY?.trim();
   if (!apiKey) throw new Error("TYPESAFE_API_KEY is not set");
 
@@ -67,10 +71,12 @@ it about which model to select.
   if (!response.ok) throw new Error(`TypeSafe returned HTTP ${response.status}`);
 
   const body: unknown = await response.json();
-  const choice = (body as { answers?: { model?: { choice?: unknown } } }).answers?.model?.choice;
-  if (!isModelId(choice)) throw new Error("TypeSafe returned an invalid model choice");
-
-  return choice;
+  const answer = (body as { answers?: { model?: { choice?: unknown; confidence?: unknown } } }).answers?.model;
+  const confidence = answer?.confidence;
+  if (typeof confidence !== "number" || !Number.isFinite(confidence))
+    throw new Error("TypeSafe returned an invalid model confidence");
+  if (!isModelId(answer?.choice)) throw new Error("TypeSafe returned an invalid model choice");
+  return { modelId: answer.choice, confident: confidence > MIN_CONFIDENCE };
 }
 
 export default function (pi: ExtensionAPI) {
@@ -89,7 +95,24 @@ export default function (pi: ExtensionAPI) {
 
     routing = true;
     try {
-      const modelId = await chooseModel(event.text, ctx.signal);
+      const { modelId: suggestedModelId, confident } = await chooseModel(event.text, ctx.signal);
+      const currentModelId =
+        ctx.model?.provider === MODEL_PROVIDER && isModelId(ctx.model.id) ? ctx.model.id : undefined;
+      let modelId = suggestedModelId;
+
+      if (!confident && currentModelId !== suggestedModelId) {
+        const choices = [suggestedModelId, ...Object.keys(MODELS).filter((id) => id !== suggestedModelId)];
+        const selected = await ctx.ui.select(
+          `TypeSafe is uncertain. Suggested model: ${suggestedModelId}`,
+          choices,
+        );
+        if (!selected) return { action: "handled" as const };
+        if (!isModelId(selected)) throw new Error("Invalid model selected");
+        modelId = selected;
+      } else if (!confident) {
+        return { action: "continue" as const };
+      }
+
       const model = ctx.modelRegistry.find(MODEL_PROVIDER, modelId);
       if (!model) throw new Error(`${MODEL_PROVIDER}/${modelId} is not registered in pi`);
       if (!(await pi.setModel(model)))
