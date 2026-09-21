@@ -17,12 +17,62 @@ const MODELS = {
 } as const;
 
 type ModelId = keyof typeof MODELS;
+type ModelProbabilities = Record<ModelId, number>;
+
+const MODEL_IDS = Object.keys(MODELS) as ModelId[];
+// Tune these against routing evals; these are conservative starting values.
+const ESCALATION_THRESHOLDS = {
+  "gpt-5.6-terra": 0.55,
+  "gpt-5.6-sol": 0.65,
+  "gpt-6-astra": 0.75,
+} as const;
 
 function isModelId(value: unknown): value is ModelId {
   return typeof value === "string" && Object.hasOwn(MODELS, value);
 }
 
-async function chooseModel(request: string, signal?: AbortSignal): Promise<ModelId> {
+function parseProbabilities(value: unknown): ModelProbabilities | undefined {
+  if (!value || typeof value !== "object") return;
+  const record = value as Record<string, unknown>;
+  if (Object.keys(record).length !== MODEL_IDS.length) return;
+
+  const probabilities = {} as ModelProbabilities;
+  for (const id of MODEL_IDS) {
+    const probability = record[id];
+    if (
+      typeof probability !== "number" ||
+      !Number.isFinite(probability) ||
+      probability < 0 ||
+      probability > 1
+    )
+      return;
+    probabilities[id] = probability;
+  }
+
+  if (Math.abs(MODEL_IDS.reduce((sum, id) => sum + probabilities[id], 0) - 1) > 1e-4)
+    return;
+  return probabilities;
+}
+
+export function routeByProbability(probabilities: ModelProbabilities): ModelId {
+  const meets = (probability: number, threshold: number) => probability + 1e-12 >= threshold;
+  const astra = probabilities["gpt-6-astra"];
+  if (meets(astra, ESCALATION_THRESHOLDS["gpt-6-astra"])) return "gpt-6-astra";
+
+  const solOrStronger = probabilities["gpt-5.6-sol"] + astra;
+  if (meets(solOrStronger, ESCALATION_THRESHOLDS["gpt-5.6-sol"])) return "gpt-5.6-sol";
+
+  const terraOrStronger = probabilities["gpt-5.6-terra"] + solOrStronger;
+  if (meets(terraOrStronger, ESCALATION_THRESHOLDS["gpt-5.6-terra"]))
+    return "gpt-5.6-terra";
+
+  return "gpt-5.6-luna";
+}
+
+async function chooseModel(
+  request: string,
+  signal?: AbortSignal,
+): Promise<{ modelId: ModelId; choice: ModelId; probabilities: ModelProbabilities }> {
   const apiKey = process.env.TYPESAFE_API_KEY?.trim();
   if (!apiKey) throw new Error("TYPESAFE_API_KEY is not set");
 
@@ -51,10 +101,18 @@ async function chooseModel(request: string, signal?: AbortSignal): Promise<Model
   if (!response.ok) throw new Error(`TypeSafe returned HTTP ${response.status}`);
 
   const body: unknown = await response.json();
-  const choice = (body as { answers?: { model?: { choice?: unknown } } }).answers?.model?.choice;
-  if (!isModelId(choice)) throw new Error("TypeSafe returned an invalid model choice");
+  const answer = (body as { answers?: { model?: { choice?: unknown; probabilities?: unknown } } })
+    .answers?.model;
+  const choice = answer?.choice;
+  const probabilities = parseProbabilities(answer?.probabilities);
+  if (
+    !isModelId(choice) ||
+    !probabilities ||
+    MODEL_IDS.some((id) => probabilities[id] > probabilities[choice] + 1e-4)
+  )
+    throw new Error("TypeSafe returned an invalid model probability distribution");
 
-  return choice;
+  return { modelId: routeByProbability(probabilities), choice, probabilities };
 }
 
 export default function (pi: ExtensionAPI) {
@@ -73,13 +131,16 @@ export default function (pi: ExtensionAPI) {
 
     routing = true;
     try {
-      const modelId = await chooseModel(event.text, ctx.signal);
+      const { modelId, choice, probabilities } = await chooseModel(event.text, ctx.signal);
       const model = ctx.modelRegistry.find(MODEL_PROVIDER, modelId);
       if (!model) throw new Error(`${MODEL_PROVIDER}/${modelId} is not registered in pi`);
       if (!(await pi.setModel(model)))
         throw new Error(`${MODEL_PROVIDER}/${modelId} is not authenticated in pi`);
 
-      ctx.ui.notify(`TypeSafe routed to ${modelId}`, "info");
+      ctx.ui.notify(
+        `TypeSafe routed to ${modelId} (Jev top choice: ${choice} ${(probabilities[choice] * 100).toFixed(0)}%)`,
+        "info",
+      );
       return { action: "continue" as const };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
