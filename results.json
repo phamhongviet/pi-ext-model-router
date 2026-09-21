@@ -1,0 +1,602 @@
+[
+  {
+    "prompt": "What is the difference between an AWS security group and a network ACL?",
+    "label": "gpt-5.6-luna",
+    "prediction": "gpt-5.6-luna"
+  },
+  {
+    "prompt": "Explain what a Kubernetes readiness probe does.",
+    "label": "gpt-5.6-luna",
+    "prediction": "gpt-5.6-luna"
+  },
+  {
+    "prompt": "What does terraform plan show?",
+    "label": "gpt-5.6-luna",
+    "prediction": "gpt-5.6-luna"
+  },
+  {
+    "prompt": "Write a kubectl command to list pods that are not Running in every namespace.",
+    "label": "gpt-5.6-luna",
+    "prediction": "gpt-5.6-luna"
+  },
+  {
+    "prompt": "Explain the difference between an EKS managed node group and Fargate.",
+    "label": "gpt-5.6-luna",
+    "prediction": "gpt-5.6-luna"
+  },
+  {
+    "prompt": "Add a resource limit of 512Mi memory and 500m CPU to this Deployment container.",
+    "label": "gpt-5.6-luna",
+    "prediction": "gpt-5.6-luna"
+  },
+  {
+    "prompt": "What does an S3 lifecycle rule do?",
+    "label": "gpt-5.6-luna",
+    "prediction": "gpt-5.6-luna"
+  },
+  {
+    "prompt": "Convert this short AWS CLI command from JSON output to a JMESPath table.",
+    "label": "gpt-5.6-luna",
+    "prediction": "gpt-5.6-luna"
+  },
+  {
+    "prompt": "Explain why a Kubernetes Service has a stable ClusterIP while pods do not.",
+    "label": "gpt-5.6-luna",
+    "prediction": "gpt-5.6-luna"
+  },
+  {
+    "prompt": "Write a Bash one-liner that prints files larger than 1 GiB under /var/log.",
+    "label": "gpt-5.6-luna",
+    "prediction": "gpt-5.6-luna"
+  },
+  {
+    "prompt": "What is the purpose of an IAM role trust policy?",
+    "label": "gpt-5.6-luna",
+    "prediction": "gpt-5.6-luna"
+  },
+  {
+    "prompt": "Add an environment variable named LOG_LEVEL to this Helm Deployment template.",
+    "label": "gpt-5.6-luna",
+    "prediction": "gpt-5.6-luna"
+  },
+  {
+    "prompt": "Explain the difference between an Aurora reader endpoint and cluster endpoint.",
+    "label": "gpt-5.6-luna",
+    "prediction": "gpt-5.6-luna"
+  },
+  {
+    "prompt": "Fix the indentation in this 25-line Kubernetes ConfigMap YAML.",
+    "label": "gpt-5.6-luna",
+    "prediction": "gpt-5.6-luna"
+  },
+  {
+    "prompt": "What does PodDisruptionBudget minAvailable mean?",
+    "label": "gpt-5.6-luna",
+    "prediction": "gpt-5.6-luna"
+  },
+  {
+    "prompt": "Write a Python function that converts EC2 hourly prices into monthly estimates.",
+    "label": "gpt-5.6-luna",
+    "prediction": "gpt-5.6-luna"
+  },
+  {
+    "prompt": "Summarize this CloudWatch alarm definition in plain English.",
+    "label": "gpt-5.6-luna",
+    "prediction": "gpt-5.6-luna"
+  },
+  {
+    "prompt": "What kubectl command shows the events for one pod?",
+    "label": "gpt-5.6-luna",
+    "prediction": "gpt-5.6-luna"
+  },
+  {
+    "prompt": "Explain Terraform state locking to a junior DevOps engineer.",
+    "label": "gpt-5.6-luna",
+    "prediction": "gpt-5.6-luna"
+  },
+  {
+    "prompt": "Add a health check endpoint returning HTTP 200 to this small Go service.",
+    "label": "gpt-5.6-luna",
+    "prediction": "gpt-5.6-luna"
+  },
+  {
+    "prompt": "What is the difference between requests and limits in Kubernetes?",
+    "label": "gpt-5.6-luna",
+    "prediction": "gpt-5.6-luna"
+  },
+  {
+    "prompt": "Write an IAM policy statement allowing read-only access to one S3 bucket.",
+    "label": "gpt-5.6-luna",
+    "prediction": "gpt-5.6-luna"
+  },
+  {
+    "prompt": "Explain why ALB target health checks can fail while the pod is healthy.",
+    "label": "gpt-5.6-luna",
+    "prediction": "gpt-5.6-luna"
+  },
+  {
+    "prompt": "Change this CronJob schedule from hourly to 02:30 UTC daily.",
+    "label": "gpt-5.6-luna",
+    "prediction": "gpt-5.6-luna"
+  },
+  {
+    "prompt": "What information does Linux iostat provide?",
+    "label": "gpt-5.6-luna",
+    "prediction": "gpt-5.6-luna"
+  },
+  {
+    "prompt": "Write a PromQL query for pod restart count over the last hour.",
+    "label": "gpt-5.6-luna",
+    "prediction": "gpt-5.6-luna"
+  },
+  {
+    "prompt": "Explain the purpose of a Helm values file.",
+    "label": "gpt-5.6-luna",
+    "prediction": "gpt-5.6-luna"
+  },
+  {
+    "prompt": "Add server-side encryption to this simple Terraform aws_s3_bucket resource.",
+    "label": "gpt-5.6-luna",
+    "prediction": "gpt-5.6-luna"
+  },
+  {
+    "prompt": "What is an AWS Spot interruption notice?",
+    "label": "gpt-5.6-luna",
+    "prediction": "gpt-5.6-luna"
+  },
+  {
+    "prompt": "Review this 40-line CircleCI job and explain each step.",
+    "label": "gpt-5.6-luna",
+    "prediction": "gpt-5.6-luna"
+  },
+  {
+    "prompt": "Create a Terraform module for an S3 bucket with versioning, KMS encryption, public-access blocking, and configurable lifecycle expiration.",
+    "label": "gpt-5.6-terra",
+    "prediction": "gpt-5.6-terra"
+  },
+  {
+    "prompt": "Debug why this EKS pod using IRSA receives AccessDenied despite the IAM policy looking correct.",
+    "label": "gpt-5.6-terra",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Add startup, readiness, and liveness probes to this API Deployment without causing failures during its 90-second warmup.",
+    "label": "gpt-5.6-terra",
+    "prediction": "gpt-5.6-terra"
+  },
+  {
+    "prompt": "Write a Helm template that creates one Ingress per hostname and supports optional TLS configuration.",
+    "label": "gpt-5.6-terra",
+    "prediction": "gpt-5.6-terra"
+  },
+  {
+    "prompt": "Migrate this 120-line Terraform configuration from count to for_each without replacing existing resources.",
+    "label": "gpt-5.6-terra",
+    "prediction": "gpt-5.6-terra"
+  },
+  {
+    "prompt": "Diagnose a Kubernetes pod stuck Pending from these scheduler events and node taints.",
+    "label": "gpt-5.6-terra",
+    "prediction": "gpt-5.6-terra"
+  },
+  {
+    "prompt": "Build a Python script that inventories EC2 instances across all enabled regions and exports owner, age, and monthly cost as CSV.",
+    "label": "gpt-5.6-terra",
+    "prediction": "gpt-5.6-terra"
+  },
+  {
+    "prompt": "Modify this CircleCI pipeline to build once, scan the image, and promote the same digest to staging and production after approval.",
+    "label": "gpt-5.6-terra",
+    "prediction": "gpt-5.6-terra"
+  },
+  {
+    "prompt": "Configure an EKS HorizontalPodAutoscaler using CPU and an external queue-depth metric, with safe scale-down behavior.",
+    "label": "gpt-5.6-terra",
+    "prediction": "gpt-5.6-terra"
+  },
+  {
+    "prompt": "Explain these Aurora Performance Insights graphs and suggest the next three SQL checks.",
+    "label": "gpt-5.6-terra",
+    "prediction": "gpt-5.6-terra"
+  },
+  {
+    "prompt": "Write an Ansible role to install, configure, validate, and safely restart nginx on Ubuntu and Amazon Linux.",
+    "label": "gpt-5.6-terra",
+    "prediction": "gpt-5.6-terra"
+  },
+  {
+    "prompt": "Debug why traffic reaches an ALB but gets intermittent 502 responses from EKS targets after deployments.",
+    "label": "gpt-5.6-terra",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Add topology spread constraints and pod anti-affinity to keep this workload available across three availability zones.",
+    "label": "gpt-5.6-terra",
+    "prediction": "gpt-5.6-terra"
+  },
+  {
+    "prompt": "Create CloudWatch alarms for an RDS instance using latency, free storage, connections, and CPU, with environment-specific thresholds.",
+    "label": "gpt-5.6-terra",
+    "prediction": "gpt-5.6-terra"
+  },
+  {
+    "prompt": "Refactor this Bash backup script to use strict mode, clean temporary files, retry S3 uploads, and preserve the original exit status.",
+    "label": "gpt-5.6-terra",
+    "prediction": "gpt-5.6-terra"
+  },
+  {
+    "prompt": "Write Terraform for an IAM role used by GitHub Actions through OIDC, restricted to the main branch of one repository.",
+    "label": "gpt-5.6-terra",
+    "prediction": "gpt-5.6-terra"
+  },
+  {
+    "prompt": "Troubleshoot this CoreDNS configuration where only some private Route 53 names fail inside the cluster.",
+    "label": "gpt-5.6-terra",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Create a NetworkPolicy that permits ingress from the ingress controller and egress only to DNS, Aurora, and one external API.",
+    "label": "gpt-5.6-terra",
+    "prediction": "gpt-5.6-terra"
+  },
+  {
+    "prompt": "Update this Go daemon to handle SIGTERM, drain queued jobs, and exit before the Kubernetes termination grace period.",
+    "label": "gpt-5.6-terra",
+    "prediction": "gpt-5.6-terra"
+  },
+  {
+    "prompt": "Compare three EC2 instance families for this supplied CPU and memory utilization profile and calculate estimated monthly savings.",
+    "label": "gpt-5.6-terra",
+    "prediction": "gpt-5.6-terra"
+  },
+  {
+    "prompt": "Design a Velero backup schedule and a concise restore verification procedure for this small EKS cluster.",
+    "label": "gpt-5.6-terra",
+    "prediction": "gpt-5.6-terra"
+  },
+  {
+    "prompt": "Fix this Helm chart so checksum annotations trigger rollouts only when the relevant ConfigMap or Secret changes.",
+    "label": "gpt-5.6-terra",
+    "prediction": "gpt-5.6-terra"
+  },
+  {
+    "prompt": "Turn these manual kubectl deployment steps into a safe idempotent Makefile target with rollout status and rollback on failure.",
+    "label": "gpt-5.6-terra",
+    "prediction": "gpt-5.6-terra"
+  },
+  {
+    "prompt": "Analyze this MariaDB slow query and schema, then propose an index while checking write amplification and selectivity.",
+    "label": "gpt-5.6-terra",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Implement validation and useful errors in this small API that accepts Kubernetes resource requests and computes capacity.",
+    "label": "gpt-5.6-terra",
+    "prediction": "gpt-5.6-terra"
+  },
+  {
+    "prompt": "Create a Karpenter NodePool for mixed Spot and On-Demand capacity with architecture, zone, and disruption constraints.",
+    "label": "gpt-5.6-terra",
+    "prediction": "gpt-5.6-terra"
+  },
+  {
+    "prompt": "Diagnose why Terraform continually reports changes to this EKS managed node group and provide the smallest stable fix.",
+    "label": "gpt-5.6-terra",
+    "prediction": "gpt-5.6-terra"
+  },
+  {
+    "prompt": "Write a Kyverno policy that requires approved registries and immutable image tags, with exclusions for system namespaces.",
+    "label": "gpt-5.6-terra",
+    "prediction": "gpt-5.6-terra"
+  },
+  {
+    "prompt": "Add structured logging and Prometheus request metrics to this 150-line Python webhook.",
+    "label": "gpt-5.6-terra",
+    "prediction": "gpt-5.6-terra"
+  },
+  {
+    "prompt": "Plan a zero-downtime upgrade of a routine stateless Helm release after its Kubernetes API versions changed.",
+    "label": "gpt-5.6-terra",
+    "prediction": "gpt-5.6-terra"
+  },
+  {
+    "prompt": "Investigate a production EKS latency spike where ALB latency rose, pod CPU stayed low, Aurora waits increased, and only one availability zone was affected.",
+    "label": "gpt-5.6-sol",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Design multi-account AWS networking for shared services, isolated production VPCs, centralized egress, inspection, and private DNS without transitive-routing surprises.",
+    "label": "gpt-5.6-sol",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Find the root cause of a rare Kubernetes leader-election split-brain from these controller logs, lease records, clock metrics, and network traces.",
+    "label": "gpt-5.6-sol",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Review this EKS platform architecture for tenant isolation and threat-model escapes involving IRSA, IMDS, admission webhooks, and privileged DaemonSets.",
+    "label": "gpt-5.6-sol",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Develop a migration plan from self-managed Kubernetes on EC2 to EKS with no customer downtime, stateful workloads, private connectivity, and a tested rollback path.",
+    "label": "gpt-5.6-sol",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Explain why this Aurora cluster deadlocks only under peak traffic by correlating transactions, lock graphs, application retries, and deployment history.",
+    "label": "gpt-5.6-sol",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Design an AWS disaster-recovery strategy for a regulated banking API with a 5-minute RPO, 30-minute RTO, ransomware recovery, and quarterly evidence requirements.",
+    "label": "gpt-5.6-sol",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Analyze whether this company should use Karpenter, Cluster Autoscaler, or both across heterogeneous EKS workloads with Spot interruptions and strict SLOs.",
+    "label": "gpt-5.6-sol",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Debug intermittent cross-zone connection resets through NLB, ingress-nginx, service mesh, and pods during node rotations.",
+    "label": "gpt-5.6-sol",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Create a least-privilege authorization design for an AI operations agent that can diagnose EKS incidents and perform a narrow set of reversible remediations.",
+    "label": "gpt-5.6-sol",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Assess this Terraform monorepo's state boundaries, provider ownership, dependency graph, and deployment coupling, then propose a staged architecture.",
+    "label": "gpt-5.6-sol",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Determine why an EKS workload's p99 latency regressed after switching to Graviton when benchmarks improved, using the supplied profiles and scheduling data.",
+    "label": "gpt-5.6-sol",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Design a multi-region active-active service on AWS while handling Aurora write ownership, Route 53 failover, idempotency, and regional isolation.",
+    "label": "gpt-5.6-sol",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Investigate unexplained AWS data-transfer growth by reconciling CUR line items, NAT metrics, VPC flow logs, Kubernetes traffic, and topology changes.",
+    "label": "gpt-5.6-sol",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Review a platform-wide secret management proposal comparing Secrets Manager, External Secrets, KMS, and Vault under rotation and outage scenarios.",
+    "label": "gpt-5.6-sol",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Diagnose cascading EKS failures where a noisy workload causes DNS timeouts, failed health checks, rescheduling, and then an autoscaling storm.",
+    "label": "gpt-5.6-sol",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Build a capacity model for a multi-tenant Kubernetes platform from load-test percentiles, bin-packing waste, failure headroom, and seasonal growth.",
+    "label": "gpt-5.6-sol",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Plan a safe Aurora major-version upgrade for a 24/7 service with replication constraints, incompatible queries, and a strict rollback window.",
+    "label": "gpt-5.6-sol",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Analyze a subtle Terraform race where two pipelines own overlapping AWS resources and occasionally undo each other's security changes.",
+    "label": "gpt-5.6-sol",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Design observability for 80 EKS clusters that preserves tenant boundaries, controls cardinality and cost, and supports cross-region incident response.",
+    "label": "gpt-5.6-sol",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Evaluate a proposed move from ALB ingress to Gateway API across dozens of clusters, including migration compatibility, security, and failure modes.",
+    "label": "gpt-5.6-sol",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Threat-model the Kubernetes software supply chain from CircleCI through ECR admission and runtime, then prioritize controls by realistic risk.",
+    "label": "gpt-5.6-sol",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Explain the conflicting evidence in this outage: no CPU saturation, rising run queue, low steal time, EBS latency bursts, and stalled JVM requests.",
+    "label": "gpt-5.6-sol",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Design a chargeback model that fairly allocates shared EKS, NAT, observability, and Savings Plan costs to teams without encouraging harmful behavior.",
+    "label": "gpt-5.6-sol",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Review this SOC 2 remediation architecture for immutable audit logs across AWS accounts and identify trust, retention, and operational gaps.",
+    "label": "gpt-5.6-sol",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Find a safe resolution to conflicting Kubernetes autoscalers where HPA, VPA, Karpenter, and application queue scaling create sustained oscillation.",
+    "label": "gpt-5.6-sol",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Compare blue-green, canary, and cell-based migration strategies for decomposing this high-volume banking workload on EKS.",
+    "label": "gpt-5.6-sol",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Investigate packet loss visible only between selected EKS nodes and Aurora after a CNI upgrade, given flow logs, conntrack stats, and route tables.",
+    "label": "gpt-5.6-sol",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Propose an incident command and recovery strategy for simultaneous AWS control-plane degradation and loss of the primary CI/CD system.",
+    "label": "gpt-5.6-sol",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Assess whether to consolidate or split these AWS organizations and EKS fleets after an acquisition with conflicting compliance boundaries.",
+    "label": "gpt-5.6-sol",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Inspect this infrastructure repository, map its Terraform and Helm deployment flow, implement EKS Pod Identity for every service, migrate existing IRSA roles without replacement, run tests, and document rollout and rollback.",
+    "label": "gpt-6-astra",
+    "prediction": "gpt-6-astra"
+  },
+  {
+    "prompt": "Take ownership of this failing production incident: inspect all supplied AWS and Kubernetes telemetry, form and test hypotheses, apply the safest repository fix, validate it in staging, and prepare the production rollout.",
+    "label": "gpt-6-astra",
+    "prediction": "gpt-6-astra"
+  },
+  {
+    "prompt": "Modernize this legacy multi-account AWS repository end to end: discover undocumented dependencies, redesign state boundaries, upgrade Terraform providers, migrate resources without recreation, and verify every environment.",
+    "label": "gpt-6-astra",
+    "prediction": "gpt-6-astra"
+  },
+  {
+    "prompt": "Audit the complete EKS platform codebase for privilege escalation paths, reproduce exploitable findings in a sandbox, implement fixes across Terraform and Helm, and add regression checks.",
+    "label": "gpt-6-astra",
+    "prediction": "gpt-6-astra"
+  },
+  {
+    "prompt": "Migrate all services in this monorepo from ingress-nginx to Gateway API across twelve EKS clusters, preserving behavior, updating tests and dashboards, and producing a staged rollback-safe rollout.",
+    "label": "gpt-6-astra",
+    "prediction": "gpt-6-astra"
+  },
+  {
+    "prompt": "Investigate a month of intermittent checkout failures across application code, Kubernetes, service mesh, Aurora, and AWS networking; reproduce the failure and ship a verified fix.",
+    "label": "gpt-6-astra",
+    "prediction": "gpt-6-astra"
+  },
+  {
+    "prompt": "Reduce this AWS estate's monthly cost by 30%: analyze CUR and workload telemetry, change Terraform and Kubernetes configuration, benchmark risk, validate savings, and create guardrails against regression.",
+    "label": "gpt-6-astra",
+    "prediction": "gpt-6-astra"
+  },
+  {
+    "prompt": "Build the production-ready EKS foundation in this repository from the architecture requirements, including networking, identity, autoscaling, observability, policy enforcement, disaster recovery, tests, and operator documentation.",
+    "label": "gpt-6-astra",
+    "prediction": "gpt-6-astra"
+  },
+  {
+    "prompt": "Upgrade this fleet of EKS clusters and every add-on across three Kubernetes minor versions; discover incompatibilities, patch manifests and application code, test workloads, and automate phased rollout.",
+    "label": "gpt-6-astra",
+    "prediction": "gpt-6-astra"
+  },
+  {
+    "prompt": "Replace the repository's static AWS credentials with workload identity across CircleCI, EKS, and operational tooling; discover consumers, implement migration, test access boundaries, and remove old secrets safely.",
+    "label": "gpt-6-astra",
+    "prediction": "gpt-6-astra"
+  },
+  {
+    "prompt": "Analyze this complete outage artifact bundle, correlate the timeline across CloudTrail, Kubernetes events, metrics, logs, and deploys, then implement and test all justified prevention changes in the repository.",
+    "label": "gpt-6-astra",
+    "prediction": "gpt-6-astra"
+  },
+  {
+    "prompt": "Re-architect and implement the CI/CD system for this monorepo so Terraform, Helm, and applications have independent plans, policy checks, approvals, drift detection, provenance, and safe rollback.",
+    "label": "gpt-6-astra",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Move this stateful platform from VMware Kubernetes to AWS EKS: inspect its deployment repositories, design the migration, automate infrastructure and data transfer, rehearse cutover, and validate recovery.",
+    "label": "gpt-6-astra",
+    "prediction": "gpt-6-astra"
+  },
+  {
+    "prompt": "Create a working isolated sandbox for AI infrastructure agents in this codebase, with allowlisted AWS and Kubernetes operations, credential boundaries, audit logs, adversarial tests, and deployment automation.",
+    "label": "gpt-6-astra",
+    "prediction": "gpt-6-astra"
+  },
+  {
+    "prompt": "Find and fix the causes of recurring Aurora overload in this application repository by tracing query generation, reproducing production load, changing code and indexes, and validating latency and cost improvements.",
+    "label": "gpt-6-astra",
+    "prediction": "gpt-6-astra"
+  },
+  {
+    "prompt": "Standardize observability across all repositories and EKS clusters: inventory current behavior, implement shared telemetry libraries and infrastructure, migrate dashboards and alerts, load-test cardinality, and document operations.",
+    "label": "gpt-6-astra",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Recover this partially failed Terraform migration: inspect remote states and live AWS resources, reconstruct intent from repository history, repair ownership without data loss, and add checks preventing recurrence.",
+    "label": "gpt-6-astra",
+    "prediction": "gpt-6-astra"
+  },
+  {
+    "prompt": "Implement a cell-based architecture for this existing service across application and infrastructure repositories, migrate tenants incrementally, prove fault isolation under load, and provide operational runbooks.",
+    "label": "gpt-6-astra",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Prepare this Kubernetes product for on-premise customer delivery: inspect all components, add KOTS packaging, preflight checks and support bundles, test disconnected installation and upgrades, and write support documentation.",
+    "label": "gpt-6-astra",
+    "prediction": "gpt-6-astra"
+  },
+  {
+    "prompt": "Perform an end-to-end resilience program for this EKS service: identify critical dependencies, implement failure injection, run game days, fix discovered weaknesses, and prove the stated RTO and RPO.",
+    "label": "gpt-6-astra",
+    "prediction": "gpt-6-astra"
+  },
+  {
+    "prompt": "Consolidate five acquired AWS platforms into one operating model: analyze their repositories and live inventories, implement account and network migrations, unify EKS tooling, and validate compliance without service interruption.",
+    "label": "gpt-6-astra",
+    "prediction": "gpt-6-astra"
+  },
+  {
+    "prompt": "Diagnose and eliminate nondeterministic deployment failures across this large Helm repository by reproducing CI behavior, tracing template and admission interactions, fixing charts, and adding broad regression coverage.",
+    "label": "gpt-6-astra",
+    "prediction": "gpt-6-astra"
+  },
+  {
+    "prompt": "Take this proof-of-concept Kubernetes capacity calculator to production: inspect its code and assumptions, validate against load tests, implement missing AWS pricing and scheduling behavior, add tests, and deploy it.",
+    "label": "gpt-6-astra",
+    "prediction": "gpt-6-astra"
+  },
+  {
+    "prompt": "Design and execute a zero-trust migration for service-to-service traffic across the whole EKS fleet, including identity, certificate rotation, policy rollout, performance testing, and emergency rollback.",
+    "label": "gpt-6-astra",
+    "prediction": "gpt-6-astra"
+  },
+  {
+    "prompt": "Trace a suspected cross-account compromise through the provided organization, repair IAM and Kubernetes weaknesses in all affected repositories, rotate credentials, validate containment, and produce durable detection rules.",
+    "label": "gpt-6-astra",
+    "prediction": "gpt-6-astra"
+  },
+  {
+    "prompt": "Replace bespoke cluster provisioning across this organization with a tested reusable EKS platform, migrating existing clusters and workloads while preserving addresses, identities, data, and team autonomy.",
+    "label": "gpt-6-astra",
+    "prediction": "gpt-5.6-sol"
+  },
+  {
+    "prompt": "Investigate why releases sometimes corrupt queued jobs, follow the behavior through application code, SQS, Kubernetes termination, and deployment automation, then implement and stress-test an end-to-end fix.",
+    "label": "gpt-6-astra",
+    "prediction": "gpt-6-astra"
+  },
+  {
+    "prompt": "Make this repository compliant with the supplied production-readiness standard: inspect every service and chart, close security and reliability gaps, execute integration and load tests, and provide evidence for each control.",
+    "label": "gpt-6-astra",
+    "prediction": "gpt-6-astra"
+  },
+  {
+    "prompt": "Rebuild disaster recovery for this AWS platform after a failed exercise: examine infrastructure and application repositories, automate regional restoration, resolve data consistency issues, and demonstrate recovery in a rehearsal.",
+    "label": "gpt-6-astra",
+    "prediction": "gpt-6-astra"
+  },
+  {
+    "prompt": "Implement organization-wide policy as code for Terraform and Kubernetes, inventory exceptions, integrate CI and admission enforcement, migrate noncompliant workloads, and test break-glass procedures.",
+    "label": "gpt-6-astra",
+    "prediction": "gpt-6-astra"
+  }
+]
