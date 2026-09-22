@@ -191,8 +191,8 @@ export default function (pi: ExtensionAPI) {
       return { action: "continue" as const };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      ctx.ui.notify(`TypeSafe routing failed: ${message}. Request was not sent.`, "error");
-      return { action: "handled" as const };
+      ctx.ui.notify(`TypeSafe routing failed: ${message}. Using current model.`, "warning");
+      return { action: "continue" as const };
     } finally {
       routing = false;
     }

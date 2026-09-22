@@ -76,3 +76,50 @@ test("sends recent conversation state to TypeSafe", async (t) => {
   });
   assert.deepEqual(notifications, [["TypeSafe routed to gpt-5.6-luna", "info"]]);
 });
+
+test("uses the current model when TypeSafe times out", async (t) => {
+  const originalFetch = globalThis.fetch;
+  const originalApiKey = process.env.TYPESAFE_API_KEY;
+  t.after(() => {
+    globalThis.fetch = originalFetch;
+    if (originalApiKey === undefined) delete process.env.TYPESAFE_API_KEY;
+    else process.env.TYPESAFE_API_KEY = originalApiKey;
+  });
+
+  process.env.TYPESAFE_API_KEY = "test-key";
+  globalThis.fetch = async () => {
+    throw new DOMException("The operation was aborted due to timeout", "TimeoutError");
+  };
+
+  let inputHandler;
+  let setModelCalled = false;
+  const model = { provider: "openai-codex", id: "gpt-5.6-terra" };
+  const pi = {
+    on(_event, handler) {
+      inputHandler = handler;
+    },
+    async setModel() {
+      setModelCalled = true;
+      return true;
+    },
+  };
+  modelRouter(pi);
+
+  const notifications = [];
+  const result = await inputHandler(
+    { text: "fix the timeout", source: "user" },
+    {
+      isIdle: () => true,
+      sessionManager: { buildContextEntries: () => [] },
+      model,
+      ui: { notify: (...args) => notifications.push(args) },
+    },
+  );
+
+  assert.deepEqual(result, { action: "continue" });
+  assert.equal(setModelCalled, false);
+  assert.deepEqual(notifications, [[
+    "TypeSafe routing failed: The operation was aborted due to timeout. Using current model.",
+    "warning",
+  ]]);
+});
