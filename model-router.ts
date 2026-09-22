@@ -1,3 +1,4 @@
+import { mkdir, writeFile } from "node:fs/promises";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 
 const TYPESAFE_URL = "https://api.typesafe.ai/v1/systemone";
@@ -5,6 +6,8 @@ const JEV_MODEL = "jev-1.13.0";
 const MODEL_PROVIDER = "openai-codex";
 const TIMEOUT_MS = 5_000;
 const MIN_CONFIDENCE = 0.65;
+const DEBUG = false;
+const JEV_DEBUG_LOG_DIR = "/tmp/pi-ext-model-router";
 
 const MODELS = {
   "gpt-5.6-luna":
@@ -87,6 +90,16 @@ function isModelId(value: unknown): value is ModelId {
   return typeof value === "string" && Object.hasOwn(MODELS, value);
 }
 
+async function writeDebugLog(name: string, contents: string): Promise<void> {
+  if (!DEBUG) return;
+  try {
+    await mkdir(JEV_DEBUG_LOG_DIR, { recursive: true });
+    await writeFile(`${JEV_DEBUG_LOG_DIR}/${name}`, contents);
+  } catch (error) {
+    console.error("Failed to write Jev debug log:", error);
+  }
+}
+
 async function chooseModel(
   state: RoutingState,
   signal?: AbortSignal,
@@ -95,29 +108,35 @@ async function chooseModel(
   if (!apiKey) throw new Error("TYPESAFE_API_KEY is not set");
 
   const timeout = AbortSignal.timeout(TIMEOUT_MS);
+  const requestBody = {
+    model: JEV_MODEL,
+    state,
+    questions: {
+      model: {
+        type: "choice",
+        instructions: `Choose the most cost-efficient model that can reliably complete the request. Prioritize capability over cost.`,
+        criteria: MODELS,
+      },
+    },
+  };
+  const debugId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  await writeDebugLog(`${debugId}-request.json`, JSON.stringify(requestBody, null, 2));
+
   const response = await fetch(TYPESAFE_URL, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      model: JEV_MODEL,
-      state,
-      questions: {
-        model: {
-          type: "choice",
-          instructions: `Choose the most cost-efficient model that can reliably complete the request. Prioritize capability over cost.`,
-          criteria: MODELS,
-        },
-      },
-    }),
+    body: JSON.stringify(requestBody),
     signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
   });
 
+  const responseText = await response.text();
+  await writeDebugLog(`${debugId}-response.json`, responseText);
   if (!response.ok) throw new Error(`TypeSafe returned HTTP ${response.status}`);
 
-  const body: unknown = await response.json();
+  const body: unknown = JSON.parse(responseText);
   const answer = (body as { answers?: { model?: { choice?: unknown; confidence?: unknown } } }).answers?.model;
   const confidence = answer?.confidence;
   if (typeof confidence !== "number" || !Number.isFinite(confidence))
