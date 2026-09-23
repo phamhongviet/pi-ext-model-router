@@ -23,10 +23,7 @@ const MODELS = {
 type ModelId = keyof typeof MODELS;
 
 type RoutingState = {
-  current_request: string;
-  conversation_context?: string;
-  current_task?: string;
-  recent_result?: string;
+  request: string;
 };
 
 const MAX_CONTEXT_CHARS = 1_800;
@@ -72,18 +69,13 @@ function buildRoutingState(ctx: ExtensionContext, request: string): RoutingState
   const substantiveTask = [...userMessages].reverse().find((item) => item.text.trim().length >= 24);
   const currentTask = substantiveTask?.text ?? userMessages.at(-1)?.text;
   const recent = messages.slice(-6).map((item) => `${item.role}: ${clip(item.text)}`);
-  const lastUserIndex = messages.map((item) => item.role).lastIndexOf("user");
-  const latestTool = [...messages.slice(lastUserIndex + 1)].reverse().find((item) => item.role === "toolResult");
-  // Keep a result only from the immediately preceding work; old tool output is noise.
-  const recentResult = latestTool && (latestTool.message?.isError || latestTool.text.length <= MAX_ITEM_CHARS)
-    ? `${latestTool.message?.toolName ?? "tool"}: ${clip(latestTool.text)}`
+  const conversationContext = recent.length
+    ? clip(recent.join("\n"), MAX_CONTEXT_CHARS)
     : undefined;
 
-  const state: RoutingState = { current_request: request };
-  if (recent.length) state.conversation_context = clip(recent.join("\n"), MAX_CONTEXT_CHARS);
-  if (currentTask) state.current_task = clip(currentTask);
-  if (recentResult) state.recent_result = recentResult;
-  return state;
+  return {
+    request: [currentTask && clip(currentTask), conversationContext, request].filter(Boolean).join("\n\n"),
+  };
 }
 
 function isModelId(value: unknown): value is ModelId {

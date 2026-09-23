@@ -68,11 +68,8 @@ test("sends recent conversation state to TypeSafe", async (t) => {
 
   assert.deepEqual(result, { action: "continue" });
   assert.deepEqual(requestBody.state, {
-    current_request: "now write a test",
-    conversation_context:
-      "summary: Earlier summary user: Refactor the deployment command to preserve environment variables. assistant: I found extra spaces. user: implement that toolResult: Updated model-router.ts",
-    current_task: "Refactor the deployment command to preserve environment variables.",
-    recent_result: "edit: Updated model-router.ts",
+    request:
+      "Refactor the deployment command to preserve environment variables.\n\nsummary: Earlier summary user: Refactor the deployment command to preserve environment variables. assistant: I found extra spaces. user: implement that toolResult: Updated model-router.ts\n\nnow write a test",
   });
   assert.deepEqual(notifications, [["TypeSafe routed to gpt-5.6-luna", "info"]]);
 });
