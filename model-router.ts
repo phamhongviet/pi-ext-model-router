@@ -36,7 +36,25 @@ function clip(value: string, limit = MAX_ITEM_CHARS): string {
 
 function messageText(message: unknown): string {
   if (!message || typeof message !== "object") return "";
-  const content = (message as { content?: unknown }).content;
+  const value = message as {
+    role?: string;
+    content?: unknown;
+    command?: unknown;
+    output?: unknown;
+    exitCode?: unknown;
+    cancelled?: unknown;
+    excludeFromContext?: boolean;
+  };
+  if (value.excludeFromContext) return "";
+  if (value.role === "bashExecution" && typeof value.command === "string") {
+    let text = `Ran \`${value.command}\`\n`;
+    text += typeof value.output === "string" && value.output ? "```\n" + value.output + "\n```" : "(no output)";
+    if (value.cancelled) text += "\n\n(command cancelled)";
+    else if (typeof value.exitCode === "number" && value.exitCode !== 0)
+      text += `\n\nCommand exited with code ${value.exitCode}`;
+    return text;
+  }
+  const content = value.content;
   if (typeof content === "string") return content;
   if (!Array.isArray(content)) return "";
   return content
@@ -50,7 +68,13 @@ function messageText(message: unknown): string {
 function buildRoutingState(ctx: ExtensionContext, request: string): RoutingState {
   const entries = ctx.sessionManager.buildContextEntries() as Array<{
     type?: string;
-    message?: { role?: string; content?: unknown; isError?: boolean; toolName?: string };
+    message?: {
+      role?: string;
+      content?: unknown;
+      isError?: boolean;
+      toolName?: string;
+      excludeFromContext?: boolean;
+    };
     summary?: string;
   }>;
   const messages = entries

@@ -53,6 +53,10 @@ test("sends recent conversation state to TypeSafe", async (t) => {
       type: "message",
       message: { role: "toolResult", toolName: "edit", content: [{ type: "text", text: "Updated model-router.ts" }] },
     },
+    {
+      type: "message",
+      message: { role: "bashExecution", command: "git status --short", output: " M model-router.ts", exitCode: 0 },
+    },
   ];
   const notifications = [];
   const result = await inputHandler(
@@ -69,7 +73,7 @@ test("sends recent conversation state to TypeSafe", async (t) => {
   assert.deepEqual(result, { action: "continue" });
   assert.deepEqual(requestBody.state, {
     request:
-      "Refactor the deployment command to preserve environment variables.\n\nsummary: Earlier summary user: Refactor the deployment command to preserve environment variables. assistant: I found extra spaces. user: implement that toolResult: Updated model-router.ts\n\nnow write a test",
+      "Refactor the deployment command to preserve environment variables.\n\nsummary: Earlier summary user: Refactor the deployment command to preserve environment variables. assistant: I found extra spaces. user: implement that toolResult: Updated model-router.ts bashExecution: Ran `git status --short` ``` M model-router.ts ```\n\nnow write a test",
   });
   assert.deepEqual(notifications, [["TypeSafe routed to gpt-5.6-luna", "info"]]);
 });
