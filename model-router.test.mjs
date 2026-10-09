@@ -17,17 +17,19 @@ test("sends recent conversation state to TypeSafe", async (t) => {
   globalThis.fetch = async (_url, options) => {
     requestBody = JSON.parse(options.body);
     return new Response(JSON.stringify({
-      answers: { model: { choice: "gpt-5.6-luna", confidence: 0.9 } },
+      answers: { model: { choice: "fast", confidence: 0.9 } },
     }));
   };
 
   let inputHandler;
-  const model = { provider: "openai-codex", id: "gpt-5.6-luna" };
+  const model = { provider: "openai-codex", id: "gpt-6.1-sol" };
   const pi = {
     on(event, handler) {
       assert.equal(event, "input");
       inputHandler = handler;
     },
+    getThinkingLevel: () => "low",
+    setThinkingLevel: (level) => assert.equal(level, "low"),
     async setModel(selected) {
       assert.equal(selected, model);
       return true;
@@ -75,7 +77,7 @@ test("sends recent conversation state to TypeSafe", async (t) => {
     request:
       "Refactor the deployment command to preserve environment variables.\n\nsummary: Earlier summary user: Refactor the deployment command to preserve environment variables. assistant: I found extra spaces. user: implement that toolResult: Updated model-router.ts bashExecution: Ran `git status --short` ``` M model-router.ts ```\n\nnow write a test",
   });
-  assert.deepEqual(notifications, [["TypeSafe routed to gpt-5.6-luna", "info"]]);
+  assert.deepEqual(notifications, [["TypeSafe routed to fast: gpt-6.1-sol, thinking low", "info"]]);
 });
 
 test("uses the current model when TypeSafe times out", async (t) => {
@@ -123,4 +125,73 @@ test("uses the current model when TypeSafe times out", async (t) => {
     "TypeSafe routing failed: The operation was aborted due to timeout. Using current model.",
     "warning",
   ]]);
+});
+
+
+test("routes the same model with different thinking levels", async (t) => {
+  const originalFetch = globalThis.fetch;
+  const originalApiKey = process.env.TYPESAFE_API_KEY;
+  t.after(() => {
+    globalThis.fetch = originalFetch;
+    if (originalApiKey === undefined) delete process.env.TYPESAFE_API_KEY;
+    else process.env.TYPESAFE_API_KEY = originalApiKey;
+  });
+  process.env.TYPESAFE_API_KEY = "test-key";
+
+  for (const [choice, confidence, currentLevel, selected, expectedLevel] of [
+    ["smart", 0.9, "low", undefined, "xhigh"],
+    ["fast", 0.9, "xhigh", undefined, "low"],
+    ["smart", 0.5, "low", "smart", "xhigh"],
+    ["smart", 0.5, "low", "fast", "low"],
+    ["smart", 0.5, "xhigh", undefined, "xhigh"],
+    ["smart", 0.5, "low", undefined, "low"],
+  ]) {
+    globalThis.fetch = async (_url, options) => {
+      const criteria = JSON.parse(options.body).questions.model.criteria;
+      assert.match(criteria.fast, /gpt-6\.1-sol, thinking low/);
+      assert.match(criteria.smart, /gpt-6\.1-sol, thinking xhigh/);
+      return new Response(JSON.stringify({ answers: { model: { choice, confidence } } }));
+    };
+    let handler;
+    let level = currentLevel;
+    const calls = [];
+    const model = { provider: "openai-codex", id: "gpt-6.1-sol" };
+    modelRouter({
+      on: (_event, fn) => { handler = fn; },
+      getThinkingLevel: () => level,
+      setThinkingLevel: (value) => { calls.push("thinking"); level = value; },
+      setModel: async (value) => {
+        assert.equal(value, model);
+        calls.push("model");
+        return true;
+      },
+    });
+    const needsPrompt = confidence < 0.65 && currentLevel !== "xhigh";
+    const result = await handler({ text: "debug this", source: "interactive" }, {
+      isIdle: () => true,
+      model,
+      sessionManager: { buildContextEntries: () => [] },
+      modelRegistry: { find: (provider, id) => {
+        assert.equal(provider, model.provider);
+        assert.equal(id, model.id);
+        return model;
+      } },
+      ui: {
+        notify: (_text, severity) => assert.equal(severity, "info"),
+        select: async (_title, choices) => {
+          assert.equal(needsPrompt, true);
+          assert.deepEqual(choices, ["smart", "fast"]);
+          calls.push("select");
+          return selected;
+        },
+      },
+    });
+    assert.equal(level, expectedLevel);
+    const applied = confidence > 0.65 || (needsPrompt && selected);
+    assert.deepEqual(calls, [
+      ...(needsPrompt ? ["select"] : []),
+      ...(applied ? ["model", "thinking"] : []),
+    ]);
+    assert.deepEqual(result, { action: needsPrompt && !selected ? "handled" : "continue" });
+  }
 });

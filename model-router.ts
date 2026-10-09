@@ -9,15 +9,18 @@ const MIN_CONFIDENCE = 0.65;
 const DEBUG = false;
 const JEV_DEBUG_LOG_DIR = "/tmp/pi-ext-model-router";
 
+// Choice names are independent of model IDs, so a model can have multiple thinking levels.
 const MODELS = {
-  "gpt-5.6-luna":
-    "Default. Use for straightforward questions, explanations, summarization, reading provided code, simple code edits, routine debugging, and tasks requiring little multi-step reasoning.",
-  "gpt-5.6-terra":
-    "Use when the task needs moderate multi-step reasoning, nontrivial debugging, several interacting constraints, or substantial code generation beyond routine edits.",
-  "gpt-5.6-sol":
-    "Use for difficult professional reasoning, complex architecture or debugging, ambiguous problems requiring careful synthesis, or demanding research.",
-  "gpt-6-astra":
-    "Reserve for exceptionally difficult end-to-end tasks, deep multi-stage reasoning, complex agentic/tool workflows, or problems where the other models are materially likely to fail.",
+  fast: {
+    modelId: "gpt-6.1-sol",
+    thinkingLevel: "low",
+    description: "Default. Use for straightforward questions, explanations, summarization, reading provided code, simple code edits, and routine debugging requiring little multi-step reasoning.",
+  },
+  smart: {
+    modelId: "gpt-6.1-sol",
+    thinkingLevel: "xhigh",
+    description: "Use for tasks needing careful multi-step reasoning, nontrivial debugging, interacting constraints, complex architecture, demanding research, or complex agentic/tool workflows.",
+  },
 } as const;
 
 type ModelId = keyof typeof MODELS;
@@ -131,7 +134,9 @@ async function chooseModel(
       model: {
         type: "choice",
         instructions: `Choose the most cost-efficient model that can reliably complete the request. Prioritize capability over cost.`,
-        criteria: MODELS,
+        criteria: Object.fromEntries(
+          Object.entries(MODELS).map(([id, route]) => [id, `${route.modelId}, thinking ${route.thinkingLevel}. ${route.description}`]),
+        ),
       },
     },
   };
@@ -181,11 +186,12 @@ export default function (pi: ExtensionAPI) {
         buildRoutingState(ctx, event.text),
         ctx.signal,
       );
-      const currentModelId =
-        ctx.model?.provider === MODEL_PROVIDER && isModelId(ctx.model.id) ? ctx.model.id : undefined;
+      const suggested = MODELS[suggestedModelId];
+      const matchesCurrent = ctx.model?.provider === MODEL_PROVIDER &&
+        ctx.model.id === suggested.modelId && pi.getThinkingLevel() === suggested.thinkingLevel;
       let modelId = suggestedModelId;
 
-      if (!confident && currentModelId !== suggestedModelId) {
+      if (!confident && !matchesCurrent) {
         const choices = [suggestedModelId, ...Object.keys(MODELS).filter((id) => id !== suggestedModelId)];
         const selected = await ctx.ui.select(
           `TypeSafe is uncertain. Suggested model: ${suggestedModelId}`,
@@ -198,12 +204,14 @@ export default function (pi: ExtensionAPI) {
         return { action: "continue" as const };
       }
 
-      const model = ctx.modelRegistry.find(MODEL_PROVIDER, modelId);
-      if (!model) throw new Error(`${MODEL_PROVIDER}/${modelId} is not registered in pi`);
+      const route = MODELS[modelId];
+      const model = ctx.modelRegistry.find(MODEL_PROVIDER, route.modelId);
+      if (!model) throw new Error(`${MODEL_PROVIDER}/${route.modelId} is not registered in pi`);
       if (!(await pi.setModel(model)))
-        throw new Error(`${MODEL_PROVIDER}/${modelId} is not authenticated in pi`);
+        throw new Error(`${MODEL_PROVIDER}/${route.modelId} is not authenticated in pi`);
+      pi.setThinkingLevel(route.thinkingLevel);
 
-      ctx.ui.notify(`TypeSafe routed to ${modelId}`, "info");
+      ctx.ui.notify(`TypeSafe routed to ${modelId}: ${route.modelId}, thinking ${pi.getThinkingLevel()}`, "info");
       return { action: "continue" as const };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
