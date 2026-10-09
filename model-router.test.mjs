@@ -24,6 +24,7 @@ test("sends recent conversation state to TypeSafe", async (t) => {
   let inputHandler;
   const model = { provider: "openai-codex", id: "gpt-6.1-sol" };
   const pi = {
+    registerCommand() {},
     on(event, handler) {
       assert.equal(event, "input");
       inputHandler = handler;
@@ -98,6 +99,7 @@ test("uses the current model when TypeSafe times out", async (t) => {
   let setModelCalled = false;
   const model = { provider: "openai-codex", id: "gpt-5.6-terra" };
   const pi = {
+    registerCommand() {},
     on(_event, handler) {
       inputHandler = handler;
     },
@@ -157,6 +159,7 @@ test("routes the same model with different thinking levels", async (t) => {
     const calls = [];
     const model = { provider: "openai-codex", id: "gpt-6.1-sol" };
     modelRouter({
+      registerCommand() {},
       on: (_event, fn) => { handler = fn; },
       getThinkingLevel: () => level,
       setThinkingLevel: (value) => { calls.push("thinking"); level = value; },
@@ -193,5 +196,104 @@ test("routes the same model with different thinking levels", async (t) => {
       ...(applied ? ["model", "thinking"] : []),
     ]);
     assert.deepEqual(result, { action: needsPrompt && !selected ? "handled" : "continue" });
+  }
+});
+
+test("pauses routing without changing user selections and resumes on command", async (t) => {
+  const originalFetch = globalThis.fetch;
+  const originalApiKey = process.env.TYPESAFE_API_KEY;
+  t.after(() => {
+    globalThis.fetch = originalFetch;
+    if (originalApiKey === undefined) delete process.env.TYPESAFE_API_KEY;
+    else process.env.TYPESAFE_API_KEY = originalApiKey;
+  });
+
+  let inputHandler;
+  let command;
+  let level = "high";
+  const calls = [];
+  const notifications = [];
+  const routedModel = { provider: "openai-codex", id: "gpt-6.1-sol" };
+  modelRouter({
+    registerCommand(name, options) {
+      assert.equal(name, "model-router");
+      command = options.handler;
+    },
+    on: (_event, handler) => { inputHandler = handler; },
+    getThinkingLevel: () => level,
+    setThinkingLevel: (value) => { calls.push("thinking"); level = value; },
+    setModel: async (model) => {
+      calls.push("model");
+      ctx.model = model;
+      return true;
+    },
+  });
+  const ctx = {
+    isIdle: () => true,
+    model: { provider: "manual", id: "user-model" },
+    sessionManager: { buildContextEntries: () => { calls.push("context"); return []; } },
+    modelRegistry: { find: () => { calls.push("registry"); return routedModel; } },
+    ui: {
+      notify: (...args) => notifications.push(args),
+      select: async () => { calls.push("select"); return "smart"; },
+    },
+  };
+  const send = () => inputHandler({ text: "debug this", source: "interactive" }, ctx);
+  const answer = (confidence = 0.9) => new Response(JSON.stringify({
+    answers: { model: { choice: "smart", confidence } },
+  }));
+  globalThis.fetch = async () => { calls.push("fetch"); return answer(); };
+
+  await command("", ctx);
+  assert.deepEqual(notifications.pop(), ["TypeSafe routing enabled.", "info"]);
+  await command(" off ", ctx);
+  assert.deepEqual(notifications.pop(), [
+    "TypeSafe routing disabled. Using current model and thinking level.", "info",
+  ]);
+  delete process.env.TYPESAFE_API_KEY;
+  assert.deepEqual(await send(), { action: "continue" });
+  assert.equal(ctx.model.id, "user-model");
+  assert.equal(level, "high");
+
+  ctx.model = { provider: "another", id: "new-user-model" };
+  level = "medium";
+  await command("invalid", ctx);
+  assert.deepEqual(notifications.pop(), ["Usage: /model-router [on|off]", "warning"]);
+  await command("", ctx);
+  assert.match(notifications.pop()[0], /routing disabled/);
+  assert.deepEqual(await send(), { action: "continue" });
+  assert.equal(ctx.model.id, "new-user-model");
+  assert.equal(level, "medium");
+  assert.deepEqual(calls, []);
+  assert.deepEqual(notifications, []);
+
+  process.env.TYPESAFE_API_KEY = "test-key";
+  await command("on", ctx);
+  assert.deepEqual(notifications.pop(), ["TypeSafe routing enabled.", "info"]);
+  assert.deepEqual(await send(), { action: "continue" });
+  assert.equal(ctx.model, routedModel);
+  assert.equal(level, "xhigh");
+  assert.deepEqual(calls, ["context", "fetch", "registry", "model", "thinking"]);
+
+  // A pause during a pending request or uncertainty prompt must also keep the current selection.
+  for (const pauseDuring of ["fetch", "select"]) {
+    calls.length = 0;
+    ctx.model = { provider: "manual", id: "user-model" };
+    level = "high";
+    await command("on", ctx);
+    globalThis.fetch = async () => {
+      calls.push("fetch");
+      if (pauseDuring === "fetch") await command("off", ctx);
+      return answer(pauseDuring === "select" ? 0.5 : 0.9);
+    };
+    ctx.ui.select = async () => {
+      calls.push("select");
+      await command("off", ctx);
+      return undefined;
+    };
+    assert.deepEqual(await send(), { action: "continue" });
+    assert.equal(ctx.model.id, "user-model");
+    assert.equal(level, "high");
+    assert.deepEqual(calls, ["context", "fetch", ...(pauseDuring === "select" ? ["select"] : [])]);
   }
 });

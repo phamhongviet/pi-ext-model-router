@@ -10,6 +10,10 @@ A pi.dev extension that automatically selects a model using TypeSafe Jev.
     export TYPESAFE_API_KEY=apikey-...
     pi
 
+Use `/model-router off` to pause automatic selection and keep your current model and thinking level. You can still change them with `/model` and `/thinking`.
+Use `/model-router on` to resume, or `/model-router` to show the current routing status.
+The pause is in-memory only: routing starts enabled again after extension reload, session switch, or restart.
+
 ## Configuration
 
 Edit `MODELS` in `model-router.ts` to define named routing choices, each with a `modelId`, `thinkingLevel`, and `description`. Choices can share a model or use different models.

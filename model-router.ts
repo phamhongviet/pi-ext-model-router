@@ -168,9 +168,26 @@ async function chooseModel(
 
 export default function (pi: ExtensionAPI) {
   let routing = false;
+  let enabled = true; // Temporary pause; reloading the extension enables routing again.
+
+  pi.registerCommand("model-router", {
+    description: "Enable or pause TypeSafe routing: /model-router [on|off]",
+    handler: async (args, ctx) => {
+      const mode = args.trim();
+      if (mode && mode !== "on" && mode !== "off") {
+        ctx.ui.notify("Usage: /model-router [on|off]", "warning");
+        return;
+      }
+      if (mode) enabled = mode === "on";
+      ctx.ui.notify(enabled
+        ? "TypeSafe routing enabled."
+        : "TypeSafe routing disabled. Using current model and thinking level.", "info");
+    },
+  });
 
   pi.on("input", async (event, ctx) => {
     if (
+      !enabled ||
       routing ||
       event.source === "extension" ||
       event.streamingBehavior ||
@@ -186,6 +203,7 @@ export default function (pi: ExtensionAPI) {
         buildRoutingState(ctx, event.text),
         ctx.signal,
       );
+      if (!enabled) return { action: "continue" as const };
       const suggested = MODELS[suggestedModelId];
       const matchesCurrent = ctx.model?.provider === MODEL_PROVIDER &&
         ctx.model.id === suggested.modelId && pi.getThinkingLevel() === suggested.thinkingLevel;
@@ -197,6 +215,7 @@ export default function (pi: ExtensionAPI) {
           `TypeSafe is uncertain. Suggested model: ${suggestedModelId}`,
           choices,
         );
+        if (!enabled) return { action: "continue" as const };
         if (!selected) return { action: "handled" as const };
         if (!isModelId(selected)) throw new Error("Invalid model selected");
         modelId = selected;
